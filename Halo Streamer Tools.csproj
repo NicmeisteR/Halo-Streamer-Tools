@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Halo_Streamer_Tools</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Authors>Nicolaas "NicmeisteR" Nel</Authors>
+    <Company>NicmeisteR</Company>
+    <Copyright>2019 NicmeisteR</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="RestSharp" Version="106.6.10" />
+  </ItemGroup>
+
+</Project>

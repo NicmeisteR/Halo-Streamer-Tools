@@ -20,6 +20,7 @@ namespace Halo_Streamer_Tools
         {
             InitializeComponent();
             startStop.BackColor = Color.LawnGreen;
+            startStop.Enabled = false;
         }
 
         private bool start = true;
@@ -35,10 +36,27 @@ namespace Halo_Streamer_Tools
         private int StartWins = 0;
         private int StartHeadshots = 0;
         private int StartXp = 0;
+        private int selectedGame;
 
         private void startStop_Click(object sender, EventArgs e)
         {
             gamertag = txt_gamertag.Text;
+
+            switch (selectedGame)
+            {
+                case 0: // Halo 5
+                    // code block
+                    break;
+                case 1: // Halo MCC
+                    // code block
+                    break;
+                case 2: // Halo Wars 2
+                    // code block
+                    break;
+                default:
+                    // code block
+                    break;
+            }
 
             if (start == true)
             {
@@ -157,6 +175,17 @@ namespace Halo_Streamer_Tools
                     await Task.Delay(seconds);
                 }
             }, cancellationToken);
+        }
+
+        private void cb_game_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            startStop.Enabled = true;
+            ComboBox cmb = (ComboBox)sender;
+            int SelectedIndex = cmb.SelectedIndex;
+            //string selectedValue = (string)cmb.SelectedItem;
+
+            selectedGame = (int)cmb.SelectedIndex;
+            //selectedGame = (string)cmb.SelectedItem;
         }
     }
 }

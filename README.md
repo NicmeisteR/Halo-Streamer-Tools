@@ -1,5 +1,5 @@
 # Halo Streamer Tools
-A streamer toolkit for Halo 5 built in C# using .Net Core 3 as a WinForms application that retrieves the game stats periodically and prints out text files that a streamer can use in OBS to overlay in game stats in near real time.
+A streamer toolkit for Halo 5 built in C# using .Net Core 3 as a WinForms application that retrieves the game stats periodically and prints out text files that a streamer can use in OBS to overlay in game stats in near real time. 
 
 # Setup
     This project is built using .Net Core 3, due to this in order to compile the project you will need:

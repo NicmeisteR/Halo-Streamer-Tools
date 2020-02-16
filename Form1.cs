@@ -20,7 +20,7 @@ namespace Halo_Streamer_Tools
         {
             InitializeComponent();
             startStop.BackColor = Color.LawnGreen;
-            startStop.Enabled = false;
+            // startStop.Enabled = false;
         }
 
         private bool start = true;
@@ -36,27 +36,12 @@ namespace Halo_Streamer_Tools
         private int StartWins = 0;
         private int StartHeadshots = 0;
         private int StartXp = 0;
-        private int selectedGame;
+        private string Type = "arena";
+        
 
         private void startStop_Click(object sender, EventArgs e)
         {
             gamertag = txt_gamertag.Text;
-
-            switch (selectedGame)
-            {
-                case 0: // Halo 5
-                    // code block
-                    break;
-                case 1: // Halo MCC
-                    // code block
-                    break;
-                case 2: // Halo Wars 2
-                    // code block
-                    break;
-                default:
-                    // code block
-                    break;
-            }
 
             if (start == true)
             {
@@ -92,21 +77,49 @@ namespace Halo_Streamer_Tools
 
         public void Start()
         {
-            var ResponseObjects = JsonConvert.DeserializeObject<dynamic>(Get($"stats/h5/servicerecords/arena?players={gamertag}"));
-            StartWins = ResponseObjects.Results[0].Result.ArenaStats.TotalGamesWon;
-            StartKills = ResponseObjects.Results[0].Result.ArenaStats.TotalKills;
-            StartHeadshots = ResponseObjects.Results[0].Result.ArenaStats.TotalHeadshots ;
-            StartXp = ResponseObjects.Results[0].Result.Xp;
+            var ResponseObjects = JsonConvert.DeserializeObject<dynamic>(Get($"stats/h5/servicerecords/{Type}?players={gamertag}"));
+            if(Type == "arena")
+            {
+              StartWins = ResponseObjects.Results[0].Result.ArenaStats.TotalGamesWon;
+              StartKills = ResponseObjects.Results[0].Result.ArenaStats.TotalKills;
+              StartHeadshots = ResponseObjects.Results[0].Result.ArenaStats.TotalHeadshots;
+              StartXp = ResponseObjects.Results[0].Result.Xp;
+            }
+            else
+            {
+              StartWins = ResponseObjects.Results[0].Result.CustomStats.TotalGamesWon;
+              StartKills = ResponseObjects.Results[0].Result.CustomStats.TotalKills;
+              StartHeadshots = ResponseObjects.Results[0].Result.CustomStats.TotalHeadshots;
+              StartXp = ResponseObjects.Results[0].Result.Xp;
+            }
+
         }
 
         void ShowStats()
         {
-            var ResponseObject = JsonConvert.DeserializeObject<dynamic>(Get($"stats/h5/servicerecords/arena?players={gamertag}"));
+            var ResponseObject = JsonConvert.DeserializeObject<dynamic>(Get($"stats/h5/servicerecords/{Type}?players={gamertag}"));
 
-            var Kills = $"Kills: {ResponseObject.Results[0].Result.ArenaStats.TotalKills - StartKills}";
-            var Wins = $"Wins: {ResponseObject.Results[0].Result.ArenaStats.TotalGamesWon - StartWins}";
-            var Headshots = $"Headshots: {ResponseObject.Results[0].Result.ArenaStats.TotalHeadshots - StartHeadshots}";
-            var Xp = $"XP: {ResponseObject.Results[0].Result.Xp - StartXp}";
+            var Kills = "";
+            var Wins = "";
+            var Headshots = "";
+            var Xp = "";
+
+            if (Type == "arena")
+            {
+                Kills = $"Kills: {ResponseObject.Results[0].Result.ArenaStats.TotalKills - StartKills}";
+                Wins = $"Wins: {ResponseObject.Results[0].Result.ArenaStats.TotalGamesWon - StartWins}";
+                Headshots = $"Headshots: {ResponseObject.Results[0].Result.ArenaStats.TotalHeadshots - StartHeadshots}";
+                Xp = $"XP: {ResponseObject.Results[0].Result.Xp - StartXp}";
+            }
+            else
+            {
+                Kills = $"Kills: {ResponseObject.Results[0].Result.CustomStats.TotalKills - StartKills}";
+                Wins = $"Wins: {ResponseObject.Results[0].Result.CustomStats.TotalGamesWon - StartWins}";
+                Headshots = $"Headshots: {ResponseObject.Results[0].Result.CustomStats.TotalHeadshots - StartHeadshots}";
+                Xp = $"XP: {ResponseObject.Results[0].Result.Xp - StartXp}";
+            }
+
+
 
             if (lbl_winstotal.InvokeRequired)
             {
@@ -177,15 +190,15 @@ namespace Halo_Streamer_Tools
             }, cancellationToken);
         }
 
-        private void cb_game_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            startStop.Enabled = true;
-            ComboBox cmb = (ComboBox)sender;
-            int SelectedIndex = cmb.SelectedIndex;
-            //string selectedValue = (string)cmb.SelectedItem;
+    private void cb_type_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      startStop.Enabled = true;
+      ComboBox cmb = (ComboBox)sender;
+      //int SelectedIndex = cmb.SelectedIndex;
+      string selectedValue = (string)cmb.SelectedItem;
 
-            selectedGame = (int)cmb.SelectedIndex;
-            //selectedGame = (string)cmb.SelectedItem;
-        }
+      Type = selectedValue.ToLower();
+      //selectedGame = (string)cmb.SelectedItem;
     }
+  }
 }

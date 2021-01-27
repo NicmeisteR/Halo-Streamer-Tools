@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -28,18 +29,25 @@ namespace Halo_Streamer_Tools
         private int _seconds = 5;
         private CancellationTokenSource cancelSource;
 
-
-        private string ApiKey = "YOUR-API-KEY-HERE";
+        private string ApiKey = "f4bfe0061ba84032b87aeb1c00600dc3";
         private int MaxXp = 50000000;
         private string gamertag;
-        private int StartKills = 0;
+
+        private int WinStreak = 0;
+        private int TotalWins = 0;
+        private int TotalLosses = 0;
+
         private int StartWins = 0;
+        private int StartLosses = 0;
+        private int StartKills = 0;
         private int StartHeadshots = 0;
         private int StartXp = 0;
         private string Type = "arena";
-        
 
-        private void startStop_Click(object sender, EventArgs e)
+        List<string> StartStats;
+
+
+    private void startStop_Click(object sender, EventArgs e)
         {
             gamertag = txt_gamertag.Text;
 
@@ -80,17 +88,21 @@ namespace Halo_Streamer_Tools
             var ResponseObjects = JsonConvert.DeserializeObject<dynamic>(Get($"stats/h5/servicerecords/{Type}?players={gamertag}"));
             if(Type == "arena")
             {
-              StartWins = ResponseObjects.Results[0].Result.ArenaStats.TotalGamesWon;
-              StartKills = ResponseObjects.Results[0].Result.ArenaStats.TotalKills;
-              StartHeadshots = ResponseObjects.Results[0].Result.ArenaStats.TotalHeadshots;
-              StartXp = ResponseObjects.Results[0].Result.Xp;
+            //   Stats.Arena(ResponseObjects);
+                StartWins = ResponseObjects.Results[0].Result.ArenaStats.TotalGamesWon;
+                StartLosses = ResponseObjects.Results[0].Result.ArenaStats.TotalGamesLost;
+                StartKills = ResponseObjects.Results[0].Result.ArenaStats.TotalKills;
+                StartHeadshots = ResponseObjects.Results[0].Result.ArenaStats.TotalHeadshots;
+                StartXp = ResponseObjects.Results[0].Result.Xp;
             }
             else
             {
-              StartWins = ResponseObjects.Results[0].Result.CustomStats.TotalGamesWon;
-              StartKills = ResponseObjects.Results[0].Result.CustomStats.TotalKills;
-              StartHeadshots = ResponseObjects.Results[0].Result.CustomStats.TotalHeadshots;
-              StartXp = ResponseObjects.Results[0].Result.Xp;
+            //   Stats.Custom(ResponseObjects);
+                StartWins = ResponseObjects.Results[0].Result.CustomStats.TotalGamesWon;
+                StartLosses = ResponseObjects.Results[0].Result.CustomStats.TotalGamesLost;
+                StartKills = ResponseObjects.Results[0].Result.CustomStats.TotalKills;
+                StartHeadshots = ResponseObjects.Results[0].Result.CustomStats.TotalHeadshots;
+                StartXp = ResponseObjects.Results[0].Result.Xp;
             }
 
         }
@@ -99,26 +111,68 @@ namespace Halo_Streamer_Tools
         {
             var ResponseObject = JsonConvert.DeserializeObject<dynamic>(Get($"stats/h5/servicerecords/{Type}?players={gamertag}"));
 
-            var Kills = "";
+            var Streak = "";
+            var tempWins = TotalWins;
+            var tempLosses = TotalLosses;
+            Debug.WriteLine(tempLosses);
+
             var Wins = "";
+            var Losses = "";
+
+
+            var Kills = "";
             var Headshots = "";
             var Xp = "";
 
             if (Type == "arena")
             {
+                TotalWins = ResponseObject.Results[0].Result.ArenaStats.TotalGamesWon - StartWins;
+                TotalLosses = ResponseObject.Results[0].Result.ArenaStats.TotalGamesLost - StartLosses;
+                 Debug.WriteLine(TotalWins);
+                if (TotalLosses != tempLosses)
+                {
+                  WinStreak = 0;
+                }
+                else
+                {
+                  if (TotalWins != tempWins)
+                  {
+                    WinStreak = WinStreak + 1;
+                  }
+                }
+
+                Streak = $"Streak: {WinStreak}";
                 Kills = $"Kills: {ResponseObject.Results[0].Result.ArenaStats.TotalKills - StartKills}";
                 Wins = $"Wins: {ResponseObject.Results[0].Result.ArenaStats.TotalGamesWon - StartWins}";
+                Losses = $"Losses: {ResponseObject.Results[0].Result.ArenaStats.TotalGamesLost - StartLosses}";
                 Headshots = $"Headshots: {ResponseObject.Results[0].Result.ArenaStats.TotalHeadshots - StartHeadshots}";
                 Xp = $"XP: {ResponseObject.Results[0].Result.Xp - StartXp}";
             }
             else
             {
+                Debug.WriteLine(TotalLosses);
+                TotalWins = ResponseObject.Results[0].Result.CustomStats.TotalGamesWon - StartWins;
+                TotalLosses = ResponseObject.Results[0].Result.CustomStats.TotalGamesLost - StartLosses;
+                Debug.WriteLine(TotalLosses);
+                if (TotalLosses != tempLosses)
+                {
+                  WinStreak = 0;
+                }
+                else
+                {
+                  if(TotalWins != tempWins)
+                  {
+                    WinStreak = WinStreak + 1;
+                  }
+                }
+
+                Streak = $"Streak: {WinStreak}";
                 Kills = $"Kills: {ResponseObject.Results[0].Result.CustomStats.TotalKills - StartKills}";
                 Wins = $"Wins: {ResponseObject.Results[0].Result.CustomStats.TotalGamesWon - StartWins}";
+                Losses = $"Losses: {ResponseObject.Results[0].Result.CustomStats.TotalGamesLost - StartLosses}";
                 Headshots = $"Headshots: {ResponseObject.Results[0].Result.CustomStats.TotalHeadshots - StartHeadshots}";
                 Xp = $"XP: {ResponseObject.Results[0].Result.Xp - StartXp}";
             }
-
 
 
             if (lbl_winstotal.InvokeRequired)
@@ -168,12 +222,29 @@ namespace Halo_Streamer_Tools
 
             //Console.WriteLine($"{kills}\n{wins}\n{headshots}");
             //Console.WriteLine(DateTime.Now.ToString("h:mm:ss tt") + " " + Kills);
-            File.WriteAllText(_outputPath + "/kills.txt", Kills);
+            File.WriteAllText(_outputPath + "/streak.txt", Streak);
             File.WriteAllText(_outputPath + "/wins.txt", Wins);
+            File.WriteAllText(_outputPath + "/losses.txt", Losses);
+            File.WriteAllText(_outputPath + "/kills.txt", Kills);
             File.WriteAllText(_outputPath + "/headshots.txt", Headshots);
             File.WriteAllText(_outputPath + "/xp.txt", Xp);
-        }
 
+            File.WriteAllText(_outputPath + "/all.txt", $"{Streak}       {Wins}       {Losses}       {Kills}       {Headshots}       {Xp}");
+            UpdateTitle(txt_title.Text, $"{MaxXp - ResponseObject.Results[0].Result.Xp.ToObject<int>()}");
+    }
+
+        void UpdateTitle(string title, string xp){
+            var client = new RestClient("https://api.twitch.tv/helix/channels?broadcaster_id=62429584");
+            var request = new RestRequest(Method.PATCH);
+            request.AddHeader("authorization", "Bearer mmpzhnc85zcdxjy013n1ccb3b7rkng");
+            request.AddHeader("client-id", "a96m941naggznrqpxc5tlpii8hk53m");
+            request.AddHeader("content-type", "application/json");
+            request.AddCookie("unique_id", "607cd02c136fa229");
+            request.AddCookie("unique_id_durable", "607cd02c136fa229");
+            request.AddCookie("twitch.lohp.countryCode", "ZA");
+            request.AddParameter("application/json", @"{""game_id"":""369567"", ""title"":" + $@"""{title} {WinStreak} Win Streak, {xp} Xp till 152""," +  @"""broadcaster_language"":""en""}", ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+        }
         Task WatcherTask(TimeSpan seconds, CancellationToken cancellationToken)
         {
             return new Task(async () =>
@@ -199,6 +270,11 @@ namespace Halo_Streamer_Tools
 
       Type = selectedValue.ToLower();
       //selectedGame = (string)cmb.SelectedItem;
+    }
+
+    private void btn_view_Click(object sender, EventArgs e)
+    {
+      System.Diagnostics.Process.Start(@"notepad.exe", $"{ _outputPath}/kills.txt");
     }
   }
 }
